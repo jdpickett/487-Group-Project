@@ -7,8 +7,15 @@ namespace Entities;
 
 public sealed class Player : IGameEntity
 {
-    public bool IsAlive => true;
+    // Update IsAlive to check health
+    public bool IsAlive => CurrentHealth > 0;
+
+    // Add health properties
+    public int MaxHealth { get; private set; } = 100;
+    public int CurrentHealth { get; private set; }
+
     public Vector2 Position { get; private set; }
+    public Rectangle Bounds => new Rectangle((int)Position.X - 10, (int)Position.Y - 10, 20, 20);
     private readonly SimpleDrawer _drawer;
     private readonly InputState _input;
 
@@ -19,13 +26,26 @@ public sealed class Player : IGameEntity
         _drawer = drawer;
         _input = input;
 
+        // Initialize health
+        CurrentHealth = MaxHealth;
+
         Position = new Vector2(
             GameConfig.Playfield.Center.X,
             GameConfig.Playfield.Bottom - 40
         );
     }
 
-    public void Update(GameTime gameTime)
+    // Add method to handle taking damage
+    public void TakeDamage(int damageAmount)
+    {
+        CurrentHealth -= damageAmount;
+        if (CurrentHealth < 0)
+        {
+            CurrentHealth = 0;
+        }
+    }
+
+    public void Update(GameTime gameTime, Vector2 playerPosition)
     {
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
